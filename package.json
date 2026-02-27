@@ -1,0 +1,28 @@
+{
+  "name": "@biginformatics/openclaw-hive",
+  "version": "0.1.0",
+  "description": "OpenClaw plugin: Hive channel, tools, and SSE listener for BigInformatics agents",
+  "license": "MIT",
+  "private": true,
+  "openclaw": {
+    "extensions": ["./src/index.ts"],
+    "channel": {
+      "id": "hive",
+      "label": "Hive",
+      "selectionLabel": "Hive (BigInformatics)",
+      "docsPath": "/channels/hive",
+      "blurb": "BigInformatics team mailbox, real-time chat, and swarm tasks.",
+      "aliases": ["hive"]
+    },
+    "install": {
+      "npmSpec": "@biginformatics/openclaw-hive",
+      "defaultChoice": "npm"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
