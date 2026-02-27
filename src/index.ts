@@ -1,119 +1,71 @@
 /**
- * @biginformatics/openclaw-hive
+ * @biginformatics/openclaw-hive v0.0.1
  *
  * OpenClaw plugin: Hive as a first-class channel.
+ * This is the initial stub release — channel, tools, and SSE service are declared
+ * but not yet implemented. Subsequent releases will fill in each piece.
  *
  * Registers:
  * - Channel adapter (inbound SSE + outbound routing: mailbox vs chat)
- * - Agent tools: hive_inbox_list, hive_inbox_reply, hive_chat_send, hive_task_list
- * - Background service: Hive SSE listener (replaces worker daemon)
+ * - Agent tools: hive_wake, hive_inbox_list, hive_inbox_reply, hive_chat_send
+ * - Background service: SSE listener (replaces worker daemon)
  * - Skill: hive (bundled, see skills/hive/SKILL.md)
- *
- * TODO: implement all stubs below
  */
 
-// Type stubs — replace with actual OpenClaw plugin API types when available
-type PluginApi = any;
-
-// ─── Config ────────────────────────────────────────────────────────────────
-
-interface HiveConfig {
-  baseUrl: string;
-  token: string;
-  sseEnabled: boolean;
-  insecure: boolean;
-}
-
-function resolveConfig(cfg: any): HiveConfig {
+function resolveConfig(cfg: any) {
   const hive = cfg?.channels?.hive ?? {};
   return {
-    baseUrl: hive.baseUrl ?? process.env.HIVE_BASE_URL ?? 'https://messages.biginformatics.net/api',
-    token: hive.token ?? process.env.HIVE_TOKEN ?? '',
+    baseUrl: hive.baseUrl ?? process.env.HIVE_BASE_URL ?? "https://messages.biginformatics.net/api",
+    token: hive.token ?? process.env.HIVE_TOKEN ?? "",
     sseEnabled: hive.sseEnabled ?? true,
     insecure: hive.insecure ?? false,
   };
 }
 
-// ─── Channel adapter ────────────────────────────────────────────────────────
-
 const hiveChannel = {
-  id: 'hive',
+  id: "hive",
   meta: {
-    id: 'hive',
-    label: 'Hive',
-    selectionLabel: 'Hive (BigInformatics)',
-    docsPath: '/channels/hive',
-    blurb: 'BigInformatics team mailbox, real-time chat, and swarm tasks.',
-    aliases: ['hive'],
+    id: "hive",
+    label: "Hive",
+    selectionLabel: "Hive (BigInformatics)",
+    docsPath: "/channels/hive",
+    blurb: "BigInformatics team mailbox, real-time chat, and swarm tasks.",
+    aliases: ["hive"],
   },
   capabilities: {
-    chatTypes: ['direct', 'group'],
+    chatTypes: ["direct", "group"],
   },
   config: {
     listAccountIds: (cfg: any) =>
-      cfg?.channels?.hive?.token ? ['default'] : [],
+      cfg?.channels?.hive?.token || process.env.HIVE_TOKEN ? ["default"] : [],
     resolveAccount: (cfg: any, accountId: string) => ({
-      accountId: accountId ?? 'default',
+      accountId: accountId ?? "default",
       token: cfg?.channels?.hive?.token ?? process.env.HIVE_TOKEN,
     }),
   },
   outbound: {
-    deliveryMode: 'direct' as const,
-    sendText: async ({ text, to, meta }: { text: string; to?: string; meta?: any }) => {
+    deliveryMode: "direct" as const,
+    sendText: async (_params: any) => {
       // TODO: route to mailbox reply or chat send based on message context
-      // - If meta.messageType === 'chat': POST /api/chat/channels/{channelId}/messages
-      // - If meta.messageType === 'mailbox': POST /api/mailboxes/me/messages/{id}/reply
-      // - Default: POST /api/mailboxes/{to}/messages (new message)
-      console.warn('[openclaw-hive] sendText not yet implemented', { to, meta });
-      return { ok: false, error: 'not implemented' };
+      // - meta.messageType === 'chat': POST /api/chat/channels/{channelId}/messages
+      // - meta.messageType === 'mailbox': POST /api/mailboxes/me/messages/{id}/reply + ack
+      // - default: POST /api/mailboxes/{to}/messages
+      return { ok: false, error: "not implemented — see roadmap" };
     },
   },
 };
 
-// ─── Agent tools ────────────────────────────────────────────────────────────
-
-function registerTools(api: PluginApi) {
-  // TODO: register tools via api.registerTool(...)
-  // Tools to implement:
-  //
-  // hive_inbox_list   — GET /api/mailboxes/me/messages?status=unread
-  // hive_inbox_reply  — POST /api/mailboxes/me/messages/{id}/reply + ack
-  // hive_chat_send    — POST /api/chat/channels/{channelId}/messages
-  // hive_chat_read    — POST /api/chat/channels/{channelId}/read
-  // hive_task_list    — GET /api/swarm/tasks?assignee=me
-  // hive_wake         — GET /api/wake
-  console.warn('[openclaw-hive] tools not yet implemented');
-}
-
-// ─── Background service (SSE listener) ──────────────────────────────────────
-
-function createSseService(cfg: HiveConfig) {
-  return {
-    id: 'hive-sse',
-    start: async () => {
-      if (!cfg.sseEnabled) return;
-      // TODO: connect to GET /api/mailboxes/me/stream
-      // On 'message' event: trigger OpenClaw wake (api.gateway.wake or openclaw cron equivalent)
-      // Persist cursor in wagl kv store (key: 'hive:sse:last_event_id')
-      // Handle reconnect with exponential backoff
-      console.warn('[openclaw-hive] SSE listener not yet implemented');
-    },
-    stop: async () => {
-      // TODO: close SSE connection cleanly
-    },
-  };
-}
-
-// ─── Plugin entry ────────────────────────────────────────────────────────────
-
-export default function register(api: PluginApi) {
+export default function register(api: any) {
   const cfg = resolveConfig(api.config);
 
   api.registerChannel({ plugin: hiveChannel });
 
-  registerTools(api);
+  // TODO: register tools — hive_wake, hive_inbox_list, hive_inbox_reply, hive_chat_send
+  // TODO: register SSE background service when cfg.sseEnabled
 
-  if (cfg.sseEnabled) {
-    api.registerService(createSseService(cfg));
+  if (api.logger?.info) {
+    api.logger.info(
+      `[openclaw-hive] registered (token=${cfg.token ? "set" : "missing"}, sse=${cfg.sseEnabled})`
+    );
   }
 }
