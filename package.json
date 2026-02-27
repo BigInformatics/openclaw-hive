@@ -14,14 +14,18 @@
     "README.md"
   ],
   "openclaw": {
-    "extensions": ["./src/index.ts"],
+    "extensions": [
+      "./src/index.ts"
+    ],
     "channel": {
       "id": "hive",
       "label": "Hive",
       "selectionLabel": "Hive (BigInformatics)",
       "docsPath": "/channels/hive",
       "blurb": "BigInformatics team mailbox, real-time chat, and swarm tasks.",
-      "aliases": ["hive"]
+      "aliases": [
+        "hive"
+      ]
     },
     "install": {
       "npmSpec": "@biginformatics/openclaw-hive",
@@ -37,5 +41,6 @@
   },
   "devDependencies": {
     "typescript": "^5.0.0"
-  }
+  },
+  "author": "Big Informatics Team <hello@biginformatics.net>"
 }
