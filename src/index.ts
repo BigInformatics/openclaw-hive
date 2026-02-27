@@ -143,12 +143,11 @@ function createSseService(cfg: any, api: any) {
       const abort = new AbortController();
       currentAbort = abort;
       try {
-        const res = await fetch(buildHiveUrl(cfg, "/api/mailboxes/me/stream"), {
+        // SSE auth uses ?token= query param — Bearer header not reliable on SSE endpoint
+        const sseUrl = `${buildHiveUrl(cfg, "/api/stream")}?token=${encodeURIComponent(token)}`;
+        const res = await fetch(sseUrl, {
           method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "text/event-stream",
-          },
+          headers: { Accept: "text/event-stream" },
           signal: abort.signal,
         });
 
