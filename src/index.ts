@@ -14,7 +14,9 @@ function resolveConfig(cfg: any) {
 }
 
 function buildHiveUrl(cfg: any, path: string): string {
-  const baseUrl = String(cfg.baseUrl ?? "").replace(/\/+$/, "");
+  // Strip trailing slashes without a polynomial regex (avoids ReDoS)
+  let baseUrl = String(cfg.baseUrl ?? "");
+  while (baseUrl.endsWith("/")) baseUrl = baseUrl.slice(0, -1);
   let normalizedPath = path.startsWith("/") ? path : `/${path}`;
   if (baseUrl.endsWith("/api") && normalizedPath.startsWith("/api/")) {
     normalizedPath = normalizedPath.slice(4);
