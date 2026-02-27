@@ -133,11 +133,9 @@ function createSseService(cfg: any, api: any) {
   };
 
   const runStream = async () => {
-    console.error("[openclaw-hive] runStream started");
     while (!stopped) {
       const token = cfg?.token ?? process.env.HIVE_TOKEN;
       if (!token) {
-        console.error("[openclaw-hive] HIVE_TOKEN missing");
         api.logger?.warn?.("[openclaw-hive] HIVE_TOKEN missing, skipping SSE listener");
         return;
       }
@@ -183,7 +181,6 @@ function createSseService(cfg: any, api: any) {
         }
       } catch (err) {
         if (!stopped) {
-          console.error(`[openclaw-hive] SSE disconnected: ${String(err)}`);
           api.logger?.warn?.(`[openclaw-hive] SSE disconnected: ${String(err)}`);
         }
       } finally {
@@ -200,7 +197,6 @@ function createSseService(cfg: any, api: any) {
   return {
     id: "hive-sse",
     start: async () => {
-      console.error("[openclaw-hive] service start() called");
       if (!cfg.sseEnabled) {
         api.logger?.info?.("[openclaw-hive] SSE disabled by config");
         return;
