@@ -1,6 +1,6 @@
 {
   "name": "@biginformatics/openclaw-hive",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Connect OpenClaw agents to Hive — the BigInformatics team communication layer. Registers Hive as a first-class OpenClaw channel with inbound SSE, automatic reply routing (mailbox and chat), agent tools, and a background listener that replaces standalone polling daemons.",
   "license": "Apache-2.0",
   "repository": {
